@@ -55,22 +55,118 @@ def get_popular_etfs() -> List[str]:
     return popular_etfs
 
 def get_additional_large_cap_stocks() -> List[str]:
-    """Get additional large cap stocks to reach 5000"""
-    # Common large cap stocks not always in S&P 500
-    additional_stocks = []
-    
-    # Generate some ticker symbols for major companies
-    major_stocks = [
-        'AAPL', 'MSFT', 'GOOGL', 'GOOG', 'AMZN', 'TSLA', 'META', 'NVDA', 'BRK.B', 'UNH',
-        'JNJ', 'XOM', 'JPM', 'V', 'PG', 'HD', 'CVX', 'MA', 'BAC', 'ABBV',
-        'PFE', 'KO', 'AVGO', 'PEP', 'TMO', 'COST', 'DIS', 'ABT', 'WMT', 'DHR'
+    """Get additional large cap stocks with real symbols"""
+    # Expanded list of real stock symbols
+    additional_stocks = [
+        # Major tech companies
+        'AAPL', 'MSFT', 'GOOGL', 'GOOG', 'AMZN', 'TSLA', 'META', 'NVDA', 'NFLX', 'ADBE',
+        'CRM', 'ORCL', 'INTC', 'AMD', 'QCOM', 'CSCO', 'UBER', 'LYFT', 'SNAP', 'TWLO',
+        'SQ', 'PYPL', 'SHOP', 'ROKU', 'ZM', 'DOCU', 'OKTA', 'CRWD', 'SNOW', 'DDOG',
+        'NET', 'TEAM', 'WDAY', 'VEEV', 'NOW', 'SPLK', 'FTNT', 'PANW', 'ZS', 'CYBR',
+        
+        # Financial sector
+        'BRK.B', 'JPM', 'V', 'MA', 'BAC', 'WFC', 'GS', 'MS', 'C', 'AXP',
+        'BLK', 'SCHW', 'USB', 'PNC', 'TFC', 'COF', 'CME', 'ICE', 'SPGI', 'MCO',
+        'FIS', 'FISV', 'ADP', 'PAYX', 'SYF', 'DFS', 'ALLY', 'RF', 'KEY', 'FITB',
+        'MTB', 'HBAN', 'CFG', 'WBS', 'ZION', 'CMA', 'PBCT', 'SIVB', 'CBOE', 'NDAQ',
+        
+        # Healthcare & Pharma
+        'UNH', 'JNJ', 'PFE', 'ABBV', 'MRK', 'TMO', 'ABT', 'DHR', 'BMY', 'AMGN',
+        'GILD', 'BIIB', 'REGN', 'VRTX', 'ISRG', 'SYK', 'BSX', 'MDT', 'EW', 'DXCM',
+        'ZBH', 'BAX', 'BDX', 'RMD', 'ILMN', 'IQV', 'A', 'ALGN', 'TECH', 'MRNA',
+        'BNTX', 'NVAX', 'TDOC', 'VEEV', 'IDXX', 'MTD', 'DGX', 'LH', 'PKI', 'WAT',
+        
+        # Consumer goods & retail
+        'PG', 'KO', 'PEP', 'WMT', 'COST', 'HD', 'LOW', 'TGT', 'NKE', 'SBUX',
+        'MCD', 'DIS', 'CMCSA', 'VZ', 'T', 'TMUS', 'CL', 'KMB', 'GIS', 'K',
+        'AMZN', 'EBAY', 'ETSY', 'W', 'WAYFAIR', 'CHWY', 'PETS', 'ZG', 'ZILLOW',
+        'ABNB', 'DASH', 'UBER', 'LYFT', 'GPS', 'ANF', 'AEO', 'URBN', 'LULU', 'DECK',
+        
+        # Energy & Utilities
+        'XOM', 'CVX', 'COP', 'EOG', 'SLB', 'MPC', 'VLO', 'PSX', 'KMI', 'OKE',
+        'NEE', 'DUK', 'SO', 'D', 'EXC', 'XEL', 'PEG', 'SRE', 'AEP', 'PCG',
+        'WMB', 'EPD', 'ET', 'MPLX', 'AM', 'PAA', 'WES', 'DCP', 'PAGP', 'TRGP',
+        'ATO', 'CMS', 'DTE', 'ETR', 'ES', 'FE', 'NI', 'PNW', 'PPL', 'WEC',
+        
+        # Industrial & Materials
+        'BA', 'CAT', 'GE', 'HON', 'UPS', 'LMT', 'RTX', 'MMM', 'DE', 'EMR',
+        'ETN', 'ITW', 'PH', 'CMI', 'ROK', 'DOV', 'FDX', 'CSX', 'UNP', 'NSC',
+        'WM', 'RSG', 'FAST', 'PCAR', 'IR', 'OTIS', 'CARR', 'TT', 'JCI', 'SWK',
+        'STZ', 'APD', 'ECL', 'FCX', 'NEM', 'AA', 'X', 'CLF', 'STLD', 'NUE',
+        
+        # Real Estate & REITs
+        'AMT', 'PLD', 'CCI', 'EQIX', 'PSA', 'EXR', 'AVB', 'EQR', 'DLR', 'WELL',
+        'VTR', 'ESS', 'MAA', 'UDR', 'CPT', 'ARE', 'BXP', 'VNO', 'SLG', 'KIM',
+        'REG', 'FRT', 'SPG', 'TCO', 'HST', 'HLT', 'MAR', 'IHG', 'WYNN', 'LVS',
+        
+        # Communication & Media
+        'GOOGL', 'META', 'NFLX', 'DIS', 'CMCSA', 'VZ', 'T', 'TMUS', 'CHTR', 'DISH',
+        'FOXA', 'FOX', 'PARA', 'WBD', 'NWSA', 'NWS', 'NYT', 'TWTR', 'SNAP', 'PINS',
+        
+        # Automotive & Transportation
+        'TSLA', 'F', 'GM', 'RIVN', 'LCID', 'NIO', 'XPEV', 'LI', 'GRAB', 'UBER',
+        'LYFT', 'DAL', 'UAL', 'AAL', 'LUV', 'JBLU', 'ALK', 'SAVE', 'HA', 'MESA',
+        
+        # Biotech & Small Pharma
+        'MRNA', 'BNTX', 'NVAX', 'SGEN', 'BMRN', 'RARE', 'SRPT', 'BLUE', 'FOLD', 'EDIT',
+        'CRSP', 'NTLA', 'BEAM', 'VERV', 'TGTX', 'SAVA', 'BIIB', 'CELG', 'GENZ', 'HZNP',
+        
+        # Semiconductors
+        'NVDA', 'AMD', 'INTC', 'QCOM', 'AVGO', 'TXN', 'ADI', 'MXIM', 'XLNX', 'LRCX',
+        'AMAT', 'KLAC', 'ASML', 'TSM', 'NXPI', 'MCHP', 'SWKS', 'QRVO', 'MPWR', 'MRVL',
+        
+        # Software & Cloud
+        'MSFT', 'ORCL', 'SAP', 'CRM', 'NOW', 'WDAY', 'ADBE', 'INTU', 'CTXS', 'VMW',
+        'SPLK', 'PLTR', 'SNOW', 'DDOG', 'OKTA', 'ZS', 'CRWD', 'S', 'WORK', 'TEAM',
+        
+        # E-commerce & Digital
+        'AMZN', 'SHOP', 'EBAY', 'ETSY', 'MELI', 'SE', 'JD', 'BABA', 'PDD', 'VIPS',
+        
+        # Crypto & Fintech
+        'COIN', 'HOOD', 'SQ', 'PYPL', 'SOFI', 'AFRM', 'UPST', 'LC', 'MARA', 'RIOT',
+        
+        # Gaming & Entertainment
+        'ATVI', 'EA', 'TTWO', 'RBLX', 'U', 'ZNGA', 'HUYA', 'DOYU', 'BILI', 'IQ',
+        
+        # Cloud Infrastructure
+        'AMZN', 'MSFT', 'GOOGL', 'ORCL', 'IBM', 'VMW', 'DELL', 'HPQ', 'NTAP', 'WDC',
+        
+        # Food & Beverage
+        'KO', 'PEP', 'MDLZ', 'GIS', 'K', 'CPB', 'CAG', 'HSY', 'SJM', 'HRL',
+        'TSN', 'TYSON', 'JBS', 'BF.B', 'STZ', 'TAP', 'SAM', 'CCEP', 'KDP', 'MNST',
+        
+        # Additional growth stocks
+        'ZOOM', 'PELOTON', 'PTON', 'BYND', 'OATLY', 'SPCE', 'OPEN', 'WISH', 'CLOV',
+        'SOFI', 'PALANTIR', 'SNOWFLAKE', 'DATADOG', 'CROWDSTRIKE', 'ZSCALER', 'OKTA'
     ]
     
-    # Add stocks with common patterns
-    for i in range(1000, 9999):
-        additional_stocks.append(f"STOCK{i}")
+    # Add more symbols to reach target with more ETFs and international stocks
+    # More ETFs
+    additional_stocks.extend([
+        'IVV', 'IEFA', 'IEMG', 'IJH', 'IJR', 'VEU', 'VTEB', 'VMOT', 'VCIT', 'VB',
+        'VO', 'VTV', 'VUG', 'VYM', 'VIG', 'VGIT', 'VGSH', 'VGLT', 'VCSH', 'VCLT',
+        'SPDW', 'SPEM', 'SPTM', 'SPMV', 'SPMD', 'SPYG', 'SPYV', 'SPHQ', 'SPLG',
+        'DIA', 'MDY', 'SLY', 'EWJ', 'EWZ', 'EWG', 'EWU', 'EWC', 'EWH', 'EWY',
+        'EWT', 'EWS', 'EWW', 'EWI', 'EWQ', 'MCHI', 'INDA', 'EPP', 'EZA', 'ECH'
+    ])
     
-    return major_stocks + additional_stocks[:4000]  # Limit to reasonable number
+    # International stocks (ADRs)
+    additional_stocks.extend([
+        'BABA', 'TSM', 'ASML', 'NVO', 'SAP', 'TM', 'SHEL', 'UL', 'SONY', 'SNY',
+        'DEO', 'BTI', 'BP', 'GSK', 'AZN', 'NVS', 'ROG', 'NESN', 'RHHBY', 'LVMUY',
+        'MC', 'OR', 'IDEXY', 'SMFG', 'MUFG', 'MFG', 'CNI', 'RY', 'TD', 'BNS',
+        'SHOP', 'BBD', 'SU', 'CNQ', 'TRP', 'ENB', 'WCN', 'CSU', 'ATD', 'OTEX'
+    ])
+    
+    # More US small and mid-cap stocks
+    additional_stocks.extend([
+        'ROKU', 'ZI', 'DOCU', 'PTON', 'PLBY', 'HOOD', 'SOFI', 'UPST', 'AFRM', 'LC',
+        'COIN', 'MARA', 'RIOT', 'HIVE', 'BITF', 'CAN', 'ARBK', 'MSTR', 'TSLA', 'NIO',
+        'XPEV', 'LI', 'LCID', 'RIVN', 'GOEV', 'RIDE', 'NKLA', 'HYLN', 'WKHS', 'FSR',
+        'CHPT', 'BLNK', 'EVGO', 'BLINK', 'SBE', 'QS', 'VLDR', 'LAZR', 'LIDR', 'OUST'
+    ])
+    
+    return additional_stocks
 
 def fetch_stock_data(symbols: List[str]) -> List[Dict]:
     """Fetch stock data for given symbols"""
@@ -174,8 +270,8 @@ def main():
         all_symbols.extend(additional_symbols)
         all_symbols = list(set(all_symbols))  # Remove duplicates again
     
-    # Take first 5000 symbols
-    selected_symbols = all_symbols[:5000]
+    # Take all available symbols (don't limit to artificial 4000)
+    selected_symbols = all_symbols
     print(f"Selected {len(selected_symbols)} symbols for data collection")
     
     # Fetch stock data
@@ -186,11 +282,11 @@ def main():
     
     # Sort by market cap (descending) where available
     df['Market Cap Numeric'] = pd.to_numeric(df['Market Cap'], errors='coerce')
-    df = df.sort_values('Market Cap Numeric', ascending=False, na_last=True)
+    df = df.sort_values('Market Cap Numeric', ascending=False, na_position='last')
     df = df.drop('Market Cap Numeric', axis=1)  # Remove helper column
     
     # Save to CSV
-    output_file = 'top_5000_stocks.csv'
+    output_file = '/data/comprehensive_stocks_data.csv'
     df.to_csv(output_file, index=False)
     
     print(f"\nSuccessfully saved {len(df)} stocks to '{output_file}'")
