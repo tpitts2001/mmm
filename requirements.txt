@@ -1,0 +1,6 @@
+# Python dependencies for this project
+# Add your required packages here with their versions
+# Example:
+# requests==2.31.0
+# numpy>=1.24.0
+# pandas==2.0.3
