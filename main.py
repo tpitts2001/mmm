@@ -36,6 +36,7 @@ import get_tickers
 import get_financial_data
 import daily_price_data
 import daily_technical_data
+import get_analysis_holdings
 
 if __name__ == "__main__":
     # Install requirements first
@@ -56,3 +57,7 @@ if __name__ == "__main__":
     print("Starting daily technical data collection...")
     daily_technical_data.main()
     print("Daily technical data collection completed!")
+    
+    print("Starting analysis and holdings data collection...")
+    get_analysis_holdings.main()
+    print("Analysis and holdings data collection completed!")
