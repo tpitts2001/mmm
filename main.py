@@ -34,6 +34,7 @@ def install_requirements():
 
 import get_tickers
 import daily_price_data
+import daily_technical_data
 
 if __name__ == "__main__":
     # Install requirements first
@@ -46,3 +47,7 @@ if __name__ == "__main__":
     print("Starting daily price data collection...")
     daily_price_data.main()
     print("Daily price data collection completed!")
+    
+    print("Starting daily technical data collection...")
+    daily_technical_data.main()
+    print("Daily technical data collection completed!")
