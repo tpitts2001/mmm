@@ -62,9 +62,12 @@ class StockLSTM(nn.Module):
         self.relu = nn.ReLU()
         
     def forward(self, x):
-        # Initialize hidden states
-        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
-        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
+        # Get device from input tensor
+        device = x.device
+        
+        # Initialize hidden states on the same device as input
+        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
+        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
         
         # Forward pass through LSTM
         lstm_out, _ = self.lstm(x, (h0, c0))
@@ -144,11 +147,11 @@ class StockPredictor:
         # Price change indicators
         if 'Close' in df.columns:
             for period in [1, 5, 10, 20]:
-                features[f'Return_{period}d'] = df['Close'].pct_change(period)
-                features[f'Volatility_{period}d'] = df['Close'].pct_change().rolling(window=period).std()
+                features[f'Return_{period}d'] = df['Close'].pct_change(period, fill_method=None)
+                features[f'Volatility_{period}d'] = df['Close'].pct_change(fill_method=None).rolling(window=period).std()
         
         # Remove any NaN values
-        features = features.fillna(method='ffill').fillna(0)
+        features = features.ffill().fillna(0)
         
         return features
     
@@ -196,9 +199,10 @@ class StockPredictor:
         
         return train_loader, val_loader
     
-    def train_model(self, train_loader, val_loader, input_size, epochs=100, learning_rate=0.001):
+    def train_model(self, train_loader, val_loader, input_size, epochs=100, learning_rate=0.001, patience=10):
         """
         Train the LSTM model using the parameters from the paper
+        Added early stopping to prevent overfitting
         """
         # Initialize model with paper's specifications
         self.model = StockLSTM(input_size=input_size, hidden_size=32, num_layers=3)
@@ -209,6 +213,8 @@ class StockPredictor:
         
         train_losses = []
         val_losses = []
+        best_val_loss = float('inf')
+        patience_counter = 0
         
         print("Starting training...")
         for epoch in range(epochs):
@@ -216,32 +222,61 @@ class StockPredictor:
             self.model.train()
             train_loss = 0
             for batch_features, batch_targets in train_loader:
-                optimizer.zero_grad()
-                outputs = self.model(batch_features)
-                loss = criterion(outputs.squeeze(), batch_targets)
-                loss.backward()
-                optimizer.step()
-                train_loss += loss.item()
+                try:
+                    optimizer.zero_grad()
+                    outputs = self.model(batch_features)
+                    loss = criterion(outputs.squeeze(), batch_targets)
+                    loss.backward()
+                    
+                    # Gradient clipping to prevent exploding gradients
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
+                    
+                    optimizer.step()
+                    train_loss += loss.item()
+                except Exception as e:
+                    print(f"Error in training batch: {e}")
+                    continue
             
             # Validation phase
             self.model.eval()
             val_loss = 0
             with torch.no_grad():
                 for batch_features, batch_targets in val_loader:
-                    outputs = self.model(batch_features)
-                    loss = criterion(outputs.squeeze(), batch_targets)
-                    val_loss += loss.item()
+                    try:
+                        outputs = self.model(batch_features)
+                        loss = criterion(outputs.squeeze(), batch_targets)
+                        val_loss += loss.item()
+                    except Exception as e:
+                        print(f"Error in validation batch: {e}")
+                        continue
             
             # Calculate average losses
-            avg_train_loss = train_loss / len(train_loader)
-            avg_val_loss = val_loss / len(val_loader)
+            avg_train_loss = train_loss / len(train_loader) if len(train_loader) > 0 else 0
+            avg_val_loss = val_loss / len(val_loader) if len(val_loader) > 0 else 0
             
             train_losses.append(avg_train_loss)
             val_losses.append(avg_val_loss)
             
+            # Early stopping check
+            if avg_val_loss < best_val_loss:
+                best_val_loss = avg_val_loss
+                patience_counter = 0
+                # Save best model state
+                self.best_model_state = self.model.state_dict().copy()
+            else:
+                patience_counter += 1
+            
             # Print progress every 10 epochs
             if (epoch + 1) % 10 == 0:
                 print(f'Epoch [{epoch+1}/{epochs}], Train Loss: {avg_train_loss:.6f}, Val Loss: {avg_val_loss:.6f}')
+            
+            # Early stopping
+            if patience_counter >= patience:
+                print(f'Early stopping at epoch {epoch+1}')
+                # Load best model state
+                if hasattr(self, 'best_model_state'):
+                    self.model.load_state_dict(self.best_model_state)
+                break
         
         return train_losses, val_losses
     
