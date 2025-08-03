@@ -3,6 +3,18 @@ import pandas as pd
 import requests
 from typing import List, Dict
 import time
+import os
+from datetime import datetime, timedelta
+
+def is_file_older_than_one_day(file_path: str) -> bool:
+    """Check if file doesn't exist or is older than one day"""
+    if not os.path.exists(file_path):
+        return True
+    
+    file_mod_time = datetime.fromtimestamp(os.path.getmtime(file_path))
+    one_day_ago = datetime.now() - timedelta(days=1)
+    
+    return file_mod_time < one_day_ago
 
 def get_sp500_symbols() -> List[str]:
     """Get S&P 500 stock symbols from Wikipedia"""
@@ -237,6 +249,14 @@ def fetch_stock_data(symbols: List[str]) -> List[Dict]:
 
 def main():
     """Main function to collect 5000 top stocks and save to CSV"""
+    output_file = 'data/comprehensive_ticker_list.csv'
+    
+    # Check if file exists and is less than a day old
+    if not is_file_older_than_one_day(output_file):
+        print(f"Data file '{output_file}' is less than a day old. Skipping data collection.")
+        print("Use the existing file or delete it to force a refresh.")
+        return
+    
     print("Starting to collect stock symbols...")
     
     all_symbols = []
@@ -285,11 +305,7 @@ def main():
     df = df.sort_values('Market Cap Numeric', ascending=False, na_position='last')
     df = df.drop('Market Cap Numeric', axis=1)  # Remove helper column
     
-    # Save to CSV
-    output_file = 'data/comprehensive_ticker_list.csv'
-    
     # Create data directory if it doesn't exist
-    import os
     os.makedirs('data', exist_ok=True)
     
     df.to_csv(output_file, index=False)
