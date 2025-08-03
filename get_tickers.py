@@ -286,7 +286,7 @@ def main():
     df = df.drop('Market Cap Numeric', axis=1)  # Remove helper column
     
     # Save to CSV
-    output_file = 'data/comprehensive_stocks_data.csv'
+    output_file = 'data/comprehensive_ticker_list.csv'
     
     # Create data directory if it doesn't exist
     import os
