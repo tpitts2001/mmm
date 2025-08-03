@@ -33,6 +33,7 @@ def install_requirements():
         sys.exit(1)
 
 import get_tickers
+import get_financial_data
 import daily_price_data
 import daily_technical_data
 
@@ -43,6 +44,10 @@ if __name__ == "__main__":
     print("Starting stock ticker collection process...")
     get_tickers.main()
     print("Ticker collection process completed!")
+    
+    print("Starting financial data collection...")
+    get_financial_data.main()
+    print("Financial data collection completed!")
     
     print("Starting daily price data collection...")
     daily_price_data.main()
