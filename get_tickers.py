@@ -286,7 +286,12 @@ def main():
     df = df.drop('Market Cap Numeric', axis=1)  # Remove helper column
     
     # Save to CSV
-    output_file = '/data/comprehensive_stocks_data.csv'
+    output_file = 'data/comprehensive_stocks_data.csv'
+    
+    # Create data directory if it doesn't exist
+    import os
+    os.makedirs('data', exist_ok=True)
+    
     df.to_csv(output_file, index=False)
     
     print(f"\nSuccessfully saved {len(df)} stocks to '{output_file}'")
