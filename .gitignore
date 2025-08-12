@@ -1,6 +1,8 @@
 # Data files
 /data/
 data/
+/test_data/
+test_data
 
 # Python cache
 __pycache__/
